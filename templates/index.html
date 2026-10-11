@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WordWise NLP - High-precision Word Counter and Text Analysis powered by Python, Flask, and Natural Language Processing (NLTK).">
+    <meta name="keywords" content="NLP Word Counter, Natural Language Processing, NLTK tokenization, text statistics, reading time, readability score">
+    <meta name="author" content="WordWise NLP">
+    <title>WordWise NLP — Word Counter & Text Analysis</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+
+    <!-- Google Fonts with full Outfit, Inter, Merriweather, and JetBrains Mono weights -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Background Animated Gradient Orbs -->
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+
+    <!-- Main Container -->
+    <div class="app-wrapper">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="brand-icon-wrapper">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="WordWise NLP Logo" class="brand-logo-img">
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title-row">
+                        <h1 class="brand-title">WordWise <span class="gradient-text">NLP</span></h1>
+                        <span class="badge-pill nlp-badge" id="engineBadge">{{ stats.nlp_engine }}</span>
+                    </div>
+                    <p class="brand-subtitle">Word Counter & Natural Language Text Analyzer</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace Grid -->
+        <main class="main-grid">
+            
+            <!-- Left Column: Editor & Controls -->
+            <section class="editor-section">
+                <form id="textForm" action="/" method="POST">
+                    
+                    <div class="editor-card">
+                        <!-- Toolbar -->
+                        <div class="editor-toolbar">
+                            <div class="toolbar-left">
+                                <span class="status-indicator live-pulse" id="liveStatus">
+                                    <span class="pulse-dot"></span> Live NLP Counting
+                                </span>
+                            </div>
+
+                            <div class="toolbar-right">
+                                <!-- Font Family Dropdown -->
+                                <div class="dropdown-wrapper">
+                                    <button type="button" class="tool-btn" id="fontDropdownBtn" title="Change Editor Font">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                                            <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                                            <line x1="9" y1="20" x2="15" y2="20"></line>
+                                            <line x1="12" y1="4" x2="12" y2="20"></line>
+                                        </svg>
+                                        <span id="currentFontLabel">Outfit</span>
+                                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                    </button>
+                                    <div class="dropdown-menu" id="fontDropdownMenu">
+                                        <div class="dropdown-header">Text Font</div>
+                                        <button type="button" class="dropdown-item font-opt active" data-font="'Outfit', sans-serif">
+                                            <strong style="font-family: 'Outfit', sans-serif;">Outfit (Geometric Modern)</strong>
+                                            <small>Modern display font</small>
+                                        </button>
+                                        <button type="button" class="dropdown-item font-opt" data-font="'Inter', sans-serif">
+                                            <strong style="font-family: 'Inter', sans-serif;">Inter (Clean Sans)</strong>
+                                            <small>Clean UI standard</small>
+                                        </button>
+                                        <button type="button" class="dropdown-item font-opt" data-font="'Merriweather', serif">
+                                            <strong style="font-family: 'Merriweather', serif;">Merriweather (Serif)</strong>
+                                            <small>Editorial & book style</small>
+                                        </button>
+                                        <button type="button" class="dropdown-item font-opt" data-font="'JetBrains Mono', monospace">
+                                            <strong style="font-family: 'JetBrains Mono', monospace;">JetBrains Mono</strong>
+                                            <small>Code & fixed-width</small>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Text Size Stepper & Dropdown -->
+                                <div class="size-control-group">
+                                    <button type="button" class="tool-btn size-btn" id="btnDecreaseFont" title="Decrease Font Size (A-)">
+                                        <span class="size-btn-icon">A−</span>
+                                    </button>
+                                    <span class="size-indicator" id="fontSizeBadge">16px</span>
+                                    <button type="button" class="tool-btn size-btn" id="btnIncreaseFont" title="Increase Font Size (A+)">
+                                        <span class="size-btn-icon">A+</span>
+                                    </button>
+                                </div>
+
+                                <!-- Text Transformations Dropdown (Case) -->
+                                <div class="dropdown-wrapper">
+                                    <button type="button" class="tool-btn" id="transformDropdownBtn" title="Change Text Case & Formatting">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                                            <path d="M4 20h16M14 4l-4 12M6 16l4-12"></path>
+                                        </svg>
+                                        <span>Case</span>
+                                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                    </button>
+                                    <div class="dropdown-menu" id="transformDropdownMenu">
+                                        <div class="dropdown-header">Transform Case</div>
+                                        <button type="button" class="dropdown-item" id="btnUpper"><strong>UPPERCASE</strong><small>Convert all to capital letters</small></button>
+                                        <button type="button" class="dropdown-item" id="btnLower"><strong>lowercase</strong><small>Convert all to small letters</small></button>
+                                        <button type="button" class="dropdown-item" id="btnTitle"><strong>Title Case</strong><small>Capitalize Important Words</small></button>
+                                        <button type="button" class="dropdown-item" id="btnSentence"><strong>Sentence case</strong><small>Capitalize first letter of sentences</small></button>
+                                        <button type="button" class="dropdown-item" id="btnToggle"><strong>tOGGLE cASE</strong><small>Invert letter casing</small></button>
+                                        <div class="dropdown-divider"></div>
+                                        <button type="button" class="dropdown-item" id="btnCleanSpaces"><strong>Clean Extra Spaces</strong><small>Remove trailing & duplicate whitespace</small></button>
+                                    </div>
+                                </div>
+
+                                <!-- Action Quick Buttons (Copy & Clear) -->
+                                <button type="button" class="tool-btn tool-btn-action" id="copyTextBtn" title="Copy All Text to Clipboard">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    <span>Copy</span>
+                                </button>
+                                <button type="button" class="tool-btn tool-btn-danger" id="clearTextBtn" title="Clear Text Input">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    <span>Clear Text</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Textarea Input Area -->
+                        <div class="textarea-container">
+                            <textarea 
+                                id="userText" 
+                                name="user_text" 
+                                placeholder="Type, write, or paste your text here to begin instant NLP word counting and natural language analysis..." 
+                                spellcheck="true"
+                                autofocus
+                            >{{ input_text }}</textarea>
+                            
+                            <div class="textarea-footer">
+                                <div class="char-limit-info" id="realtimeRibbon">
+                                    <span class="ribbon-item"><strong><span id="ribbonWords">{{ stats.word_count }}</span></strong> words</span>
+                                    <span class="ribbon-sep">•</span>
+                                    <span class="ribbon-item"><strong><span id="ribbonChars">{{ stats.character_count }}</span></strong> characters</span>
+                                    <span class="ribbon-sep">•</span>
+                                    <span class="ribbon-item"><strong><span id="ribbonSentences">{{ stats.sentence_count }}</span></strong> sentences</span>
+                                </div>
+                                <div class="textarea-shortcuts">
+                                    <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to Analyze
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Primary Action Buttons -->
+                        <div class="editor-actions-row">
+                            <button type="submit" class="btn btn-primary" id="analyzeBtn">
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                </svg>
+                                <span>Deep NLP Analysis</span>
+                            </button>
+                            
+                            <button type="button" class="btn btn-secondary" id="exportReportBtn" title="Export Results">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                <span>Export Report</span>
+                            </button>
+
+                            <button type="button" class="btn btn-secondary" id="copyStatsBtn" title="Copy Full Stats Summary">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                </svg>
+                                <span>Copy Stats</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Project Quick Features Banner -->
+                <div class="features-card">
+                    <div class="feature-item">
+                        <div class="feat-icon">⚡</div>
+                        <div>
+                            <h4>Live Tokenization</h4>
+                            <p>Instant word and character calculation as you type</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feat-icon">🧠</div>
+                        <div>
+                            <h4>NLTK Sentence Segmentation</h4>
+                            <p>Identifies sentence boundaries excluding punctuation</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feat-icon">📊</div>
+                        <div>
+                            <h4>Readability & Keywords</h4>
+                            <p>Flesch Reading Ease score & Stopwords filtering</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column: Results & NLP Analytics Dashboard -->
+            <section class="results-section">
+                
+                <!-- Primary Stats 4-Card Grid -->
+                <div class="stats-grid">
+                    
+                    <!-- Words Card -->
+                    <div class="stat-card primary-stat">
+                        <div class="stat-card-header">
+                            <span class="stat-label">Total Words</span>
+                            <div class="stat-icon-badge icon-words">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="statWords">{{ stats.word_count }}</div>
+                        <div class="stat-footer">
+                            <span class="sub-badge">NLTK Tokenized</span>
+                            <span class="stat-subtext">Excludes punctuation</span>
+                        </div>
+                    </div>
+
+                    <!-- Characters Card -->
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <span class="stat-label">Characters</span>
+                            <div class="stat-icon-badge icon-chars">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><polyline points="10 8 10 16 14 16"/></svg>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="statChars">{{ stats.character_count }}</div>
+                        <div class="stat-footer">
+                            <span class="stat-subtext">No spaces: <strong id="statCharsNoSpaces">{{ stats.character_count_no_spaces }}</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Sentences Card -->
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <span class="stat-label">Sentences</span>
+                            <div class="stat-icon-badge icon-sentences">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="statSentences">{{ stats.sentence_count }}</div>
+                        <div class="stat-footer">
+                            <span class="stat-subtext">Avg sentence: <strong id="statAvgSentenceLen">{{ stats.avg_sentence_length }}</strong> wds</span>
+                        </div>
+                    </div>
+
+                    <!-- Paragraphs Card -->
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <span class="stat-label">Paragraphs</span>
+                            <div class="stat-icon-badge icon-paras">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 4v16M17 4v16M19 4H9.5a4.5 4.5 0 0 0 0 9H13"/></svg>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="statParagraphs">{{ stats.paragraph_count }}</div>
+                        <div class="stat-footer">
+                            <span class="stat-subtext">Avg word: <strong id="statAvgWordLen">{{ stats.avg_word_length }}</strong> chars</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Secondary Intelligence Cards Grid -->
+                <div class="analytics-row">
+                    
+                    <!-- Time & Pace Estimation -->
+                    <div class="dashboard-card pace-card">
+                        <div class="card-title-row">
+                            <h3 class="card-title">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                Estimated Pace
+                            </h3>
+                        </div>
+                        <div class="pace-grid">
+                            <div class="pace-item">
+                                <div class="pace-icon">📖</div>
+                                <div class="pace-info">
+                                    <span class="pace-label">Reading Time (200 wpm)</span>
+                                    <span class="pace-value" id="statReadingTime">{{ stats.reading_time }}</span>
+                                </div>
+                            </div>
+                            <div class="pace-item">
+                                <div class="pace-icon">🎙️</div>
+                                <div class="pace-info">
+                                    <span class="pace-label">Speaking Time (130 wpm)</span>
+                                    <span class="pace-value" id="statSpeakingTime">{{ stats.speaking_time }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Readability & Complexity Card -->
+                    <div class="dashboard-card readability-card">
+                        <div class="card-title-row">
+                            <h3 class="card-title">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                                Readability & Diversity
+                            </h3>
+                            <span class="badge-pill readability-pill" id="readabilityBadge">{{ stats.readability_label }}</span>
+                        </div>
+                        
+                        <div class="readability-content">
+                            <div class="readability-score-box">
+                                <div class="score-circle">
+                                    <span class="score-num" id="statReadabilityScore">{{ stats.readability_score }}</span>
+                                    <span class="score-scale">/100</span>
+                                </div>
+                                <div class="score-meta">
+                                    <span class="score-title">Flesch Reading Ease</span>
+                                    <span class="score-grade" id="statReadabilityGrade">{{ stats.readability_grade }}</span>
+                                </div>
+                            </div>
+
+                            <div class="diversity-box">
+                                <div class="diversity-header">
+                                    <span>Lexical Diversity (Unique Words)</span>
+                                    <span class="diversity-pct" id="statLexicalPct">{{ stats.lexical_diversity }}%</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill" id="lexicalProgressBar" data-initial-width="{{ stats.lexical_diversity }}"></div>
+                                </div>
+                                <div class="diversity-sub">
+                                    <span id="statUniqueCount">{{ stats.unique_words_count }}</span> unique out of <span id="statUniqueTotal">{{ stats.word_count }}</span> words
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+        </main>
+
+        <!-- Toast Notification Container -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-container">
+                <div class="footer-brand-block">
+                    <div class="footer-logo-row">
+                        <img src="{{ url_for('static', filename='logo.png') }}" alt="WordWise NLP Logo" class="footer-logo-img">
+                        <h3 class="footer-title">WordWise <span class="gradient-text">NLP</span>: Word Counter Using Natural Language Processing</h3>
+                    </div>
+                    <p class="footer-tagline">Intelligent Text Analysis & Word Counting Engine</p>
+                </div>
+
+                <div class="footer-powered-badge">
+                    <span>Powered by <strong>Python • Flask • NLTK</strong></span>
+                </div>
+
+                <div class="footer-features-bar">
+                    <span>Advanced Text Processing</span>
+                    <span class="footer-sep">|</span>
+                    <span>Clean Tokenization</span>
+                    <span class="footer-sep">|</span>
+                    <span>Sentence Segmentation</span>
+                    <span class="footer-sep">|</span>
+                    <span>Text Statistics</span>
+                    <span class="footer-sep">|</span>
+                    <span>Word Frequency Analysis</span>
+                    <span class="footer-sep">|</span>
+                    <span>Readability Metrics</span>
+                </div>
+
+                <div class="footer-quote-block">
+                    <p class="footer-insight"><em>Transforming Text into Meaningful Insights. Fast. Accurate. Intelligent.</em></p>
+                    <p class="footer-developer">Developed by <strong>Kaustubh Ashish Bangar</strong></p>
+                </div>
+
+                <div class="footer-copyright">
+                    <p>© 2027 WordWise NLP. All Rights Reserved.</p>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Hidden Server-Rendered JSON for Client JS Hydration -->
+    <script id="serverStatsData" type="application/json">
+        {{ stats | tojson | safe }}
+    </script>
+
+    <!-- JavaScript Application Logic -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
